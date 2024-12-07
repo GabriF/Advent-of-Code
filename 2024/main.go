@@ -3,5 +3,5 @@ package main
 import "aoc/days"
 
 func main() {
-	days.D02()
+	days.D03()
 }
