@@ -8,53 +8,54 @@ import (
 	"strings"
 )
 
+func checkRaw(nums []string, tolerance int) bool {
+	fmt.Println("EVAL:", nums)
+	decreasing := true
+	prec, _ := strconv.Atoi(nums[0])
+	for i, num := range nums[1:] {
+		curr, _ := strconv.Atoi(num)
+		if i == 0 && curr > prec {
+			decreasing = false
+		}
+
+		if diff := math.Abs(float64(prec - curr)); diff > 3 ||
+			diff < 1 ||
+			(curr > prec && decreasing) ||
+			(curr < prec && (!decreasing)) {
+			if tolerance > 0 {
+				fmt.Println("REM:", i, num)
+				return checkRaw(append(nums[:i], nums[i+1:]...), tolerance-1)
+			} else {
+				return false
+			}
+		}
+
+		prec = curr
+	}
+	return true
+}
+
 func safeCounter(tolerance int) int {
 	raws, ok := utils.ReadInput("input/input_d02.txt")
 	if !ok {
 		fmt.Println("ERR")
+		return -1
 	}
 
 	safeCounter := 0
 	for _, raw := range raws {
 		tokens := strings.Split(raw, " ")
-
-		decreasing := true
-		badLevels := 0
-		prec, _ := strconv.Atoi(tokens[0])
-		for i := 1; i < len(tokens)-1 && badLevels <= tolerance; i++ {
-			cur, _ := strconv.Atoi(tokens[i])
-
-			if i == 1 && prec < cur {
-				decreasing = false
-			}
-
-			if (math.Abs(float64(cur-prec)) > 3) ||
-				(cur == prec) ||
-				(cur > prec && decreasing) ||
-				(cur < prec && !decreasing) {
-				badLevels++
-				cur = prec
-			}
-			prec = cur
-		}
-
-		if badLevels <= tolerance {
+		if checkRaw(tokens, tolerance) {
 			safeCounter++
+		} else {
+			fmt.Println(tokens)
 		}
 	}
 
 	return safeCounter
 }
 
-func d2p1() {
-	fmt.Println(safeCounter(0))
-}
-
-func d2p2() {
-	fmt.Println(safeCounter(1))
-}
-
 func D02() {
-	d2p1()
-	d2p2()
+	fmt.Println(safeCounter(0))
+	fmt.Println(safeCounter(1))
 }
